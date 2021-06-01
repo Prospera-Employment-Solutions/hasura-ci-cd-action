@@ -62,7 +62,7 @@ if [ -n "$INPUT_HASURA_MIGRATIONS_ENABLED" ]; then
       exit 1
     }
     debug "Applying migrations"
-    hasura migrate apply --endpoint "$INPUT_HASURA_ENDPOINT" --admin-secret "$INPUT_HASURA_ADMIN_SECRET" --database "default" || {
+    hasura migrate apply --endpoint "$INPUT_HASURA_ENDPOINT" --admin-secret "$INPUT_HASURA_ADMIN_SECRET" --database-name "default" || {
       error "Failed applying migrations"
       exit 1
     }
@@ -79,7 +79,7 @@ if [ -n "$INPUT_HASURA_MIGRATIONS_ENABLED" ]; then
       exit 1
     }
     debug "Applying migrations"
-    hasura migrate apply --admin-secret "$INPUT_HASURA_ADMIN_SECRET" --database "default" || {
+    hasura migrate apply --admin-secret "$INPUT_HASURA_ADMIN_SECRET" --database-name "default" || {
       error "Failed applying migrations"
       exit 1
     }
@@ -94,53 +94,53 @@ else
   warn "Migrations not enabled, skipping"
 fi
 
-if [ -n "$INPUT_HASURA_SEEDS_ENABLED" ]; then
-  debug "Preparing to apply seeds"
-  # If admin secret given in inputs, append it to migrate apply, else don't (use default from config.yaml)
-  if [ -n "$INPUT_HASURA_ENDPOINT" ]; then
-    debug "Applying seeds:"
-    hasura seeds apply --endpoint "$INPUT_HASURA_ENDPOINT" --admin-secret "$INPUT_HASURA_ADMIN_SECRET" || {
-      error "Failed getting migration status"
-      exit 1
-    }
-  else
-    debug "Applying seeds:"
-    hasura seeds apply --admin-secret "$INPUT_HASURA_ADMIN_SECRET" || {
-      error "Failed getting migration status"
-      exit 1
-    }
-  fi
-else
-  warn "Seeds not enabled, skipping"
-fi
+# if [ -n "$INPUT_HASURA_SEEDS_ENABLED" ]; then
+#   debug "Preparing to apply seeds"
+#   # If admin secret given in inputs, append it to migrate apply, else don't (use default from config.yaml)
+#   if [ -n "$INPUT_HASURA_ENDPOINT" ]; then
+#     debug "Applying seeds:"
+#     hasura seeds apply --endpoint "$INPUT_HASURA_ENDPOINT" --admin-secret "$INPUT_HASURA_ADMIN_SECRET" || {
+#       error "Failed getting migration status"
+#       exit 1
+#     }
+#   else
+#     debug "Applying seeds:"
+#     hasura seeds apply --admin-secret "$INPUT_HASURA_ADMIN_SECRET" || {
+#       error "Failed getting migration status"
+#       exit 1
+#     }
+#   fi
+# else
+#   warn "Seeds not enabled, skipping"
+# fi
 
-# If regression tests not enabled, end things here
-if [ -z "$INPUT_HASURA_REGRESSION_TESTS_ENABLED" ]; then
-  debug "Regression tests not enabled, finished."
-  exit 0
-fi
+# # If regression tests not enabled, end things here
+# if [ -z "$INPUT_HASURA_REGRESSION_TESTS_ENABLED" ]; then
+#   debug "Regression tests not enabled, finished."
+#   exit 0
+# fi
 
-debug "Writing personal access token to config file"
-# Write Personal Access Token to config file in home directory for Pro CLI plugin
-echo "pat: $INPUT_HASURA_PERSONAL_ACCESS_TOKEN" >>~/.hasura/pro_config.yaml || {
-  error "Failed writing Pro personal access token to ~/.hasura/config.yaml"
-  exit 1
-}
+# debug "Writing personal access token to config file"
+# # Write Personal Access Token to config file in home directory for Pro CLI plugin
+# echo "pat: $INPUT_HASURA_PERSONAL_ACCESS_TOKEN" >>~/.hasura/pro_config.yaml || {
+#   error "Failed writing Pro personal access token to ~/.hasura/config.yaml"
+#   exit 1
+# }
 
-debug "Installing Hasura CLI Pro plugin"
-# Install the Pro CLI plugin
-hasura plugins install pro || {
-  error "Failed installing Pro CLI plugin"
-  exit 1
-}
+# debug "Installing Hasura CLI Pro plugin"
+# # Install the Pro CLI plugin
+# hasura plugins install pro || {
+#   error "Failed installing Pro CLI plugin"
+#   exit 1
+# }
 
-debug "Running regression tests"
-# Run regression tests
-hasura pro regression-tests run \
-  --endpoint "$INPUT_HASURA_ENDPOINT" \
-  --admin-secret "$INPUT_HASURA_ADMIN_SECRET" \
-  --project-id "$INPUT_HASURA_PROJECT_ID" \
-  --testsuite-id "$INPUT_HASURA_REGRESSION_TESTSUITE_ID" || {
-  error "Failed regression tests"
-  exit 1
-}
+# debug "Running regression tests"
+# # Run regression tests
+# hasura pro regression-tests run \
+#   --endpoint "$INPUT_HASURA_ENDPOINT" \
+#   --admin-secret "$INPUT_HASURA_ADMIN_SECRET" \
+#   --project-id "$INPUT_HASURA_PROJECT_ID" \
+#   --testsuite-id "$INPUT_HASURA_REGRESSION_TESTSUITE_ID" || {
+#   error "Failed regression tests"
+#   exit 1
+# }
